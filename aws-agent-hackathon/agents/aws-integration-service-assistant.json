@@ -1,0 +1,320 @@
+{
+  "text" : "---begin-prompt---\n\n${((aiImplPlugin.isDefined(prompt.invokeContext) && aiImplPlugin.isDefined(prompt.invokeContext.contextData) && aiImplPlugin.isDefined(prompt.invokeContext.contextData.fileSystemContextIncludes) && aiImplPlugin.isDefined(aiImplPlugin.getFromMap(prompt.invokeContext.contextData.fileSystemContextIncludes,\"default\")) && aiImplPlugin.objectSize(aiImplPlugin.getFromMap(prompt.invokeContext.contextData.fileSystemContextIncludes,\"default\").files)>0)?\"Following is a list of files or directories and their content, as part of the task you will be asked to perform you may use them as needed. Here is the list:\"+aiImplPlugin.stringify(botworx-await aiImplPlugin.getContent(aiImplPlugin.getFromMap(prompt.invokeContext.contextData.fileSystemContextIncludes,\"default\").files,true)):\"\")}\n\nYou are a \"${prompt.promptData.employeeRole}\", you will be performing business tasks for your supervisor.\n\nBelow you will be presented with the rules that will guide you in performing your\nrole as a \"${prompt.promptData.employeeRole}\".\n\nBelow are guidelines that will help you in performing your role as a \"${prompt.promptData.employeeRole}\".\n\n  You have access to tools, use them to perform your duties.\n  When presenting your response: \n    You must summarize any detailed textual information.\n    You must structure any data from the tools you use as json in your response.\n  You are an independent assistant, do not contact your supervisor, just go ahead and perform requested task.\n\nBelow is information that will help you in performing the requested task, it might be instructions or just be additional information, use it as appropriate:\n${botworx-await aiImplPlugin.getInstructions(prompt,(aiImplPlugin.isDefined(prompt.invokeContext.contextData.promptText) && aiImplPlugin.objectSize(prompt.invokeContext.contextData.promptText) > 0),false,true,(aiImplPlugin.isDefined(session)?session.id:null))}\n\n---end-prompt---\n\n---begin-prompt-data---\n{\n  \"evalContextData\":${terminal aiImplPlugin.stringify(botworx-await aiImplPlugin.getFromMap(tools,\"default\").initEvalContext(prompt,config,session,appBuilder,aiInterface,aiImplPlugin,tools))},\n  \"workingDir\":${(aiImplPlugin.isDefined(prompt.invokeContext) && aiImplPlugin.isDefined(prompt.invokeContext.contextData) && aiImplPlugin.isDefined(prompt.invokeContext.contextData.contextPath))?aiImplPlugin.stringify((prompt.invokeContext.contextData.isDir?prompt.invokeContext.contextData.contextPath:prompt.invokeContext.contextData.contextPath.substring(0,prompt.invokeContext.contextData.contextPath.lastIndexOf(\"/\")))):(aiImplPlugin.isDefined(prompt.workingDir)?aiImplPlugin.stringify(prompt.workingDir):null)},\n  \"argData\":{\n    \"promptSession\":{\n       \"appObjectPath\":\"${prompt.invokeContext.contextData.appObjectPath}\"\n    }\n  },\n  \"requireSupervisorAck\":\"must not\",\n  \"supervisorName\":${terminal aiImplPlugin.stringify(aiImplPlugin.isDefined(prompt.invokeContext.contextData.supervisorName)?prompt.invokeContext.contextData.supervisorName:\"Edmond\")},\n  \"supervisorPronoun\":${terminal aiImplPlugin.stringify(aiImplPlugin.isDefined(prompt.invokeContext.contextData.supervisorPronoun)?prompt.invokeContext.contextData.supervisorPronoun:\"his\")},\n  \"supervisorEmail\":\"ekemokai@codesolvent.com\",\n  \"employeeName\":\"integrator\",\n  \"employeeRole\":\"Integrated Services Assistant\"\n}\n---end-prompt-data---",
+  "apiRequest" : {
+    "tool_choice" : "auto",
+    "tools" : [ {
+      "type" : "function",
+      "function" : {
+        "name" : "list_dir",
+        "description" : "Use this tool to get a directory list, it will return a list of paths in a given directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "move_file",
+        "description" : "Use this tool to move a file or directory into a new parent directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            },
+            "newParentPath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath", "newParentPath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "copy_file",
+        "description" : "Use this tool to copy a file or directory into a new parent directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            },
+            "newParentPath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath", "newParentPath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "rename_file",
+        "description" : "Use this tool to rename a file or directory. When renaming a file or directory,\n\"newFileName\" argument must be just the name (including file extension), but not the full new path.",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            },
+            "newFileName" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath", "newFileName" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "delete_file",
+        "description" : "Use this tool to delete a file or directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "download_file",
+        "description" : "Use this tool to download files from the internet.\n\nSet \"fileUrl\" to the http url of the file to download.\n\nSet \"saveAsName\" to a new file name if the file should be saved with a different name from its source name.\n\nSet \"unpack\" to \"true\" if the file is a zip file and would need to be unziped after download.\n\nSet \"destinationDirPath\" to the path of the directory where the file should be saved. If not specified then\nthe downloaded file will be saved in the current working directory \"./\".",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "fileUrl" : {
+              "type" : "string"
+            },
+            "destinationDirPath" : {
+              "type" : "string"
+            },
+            "saveAsName" : {
+              "type" : "string"
+            },
+            "unpack" : {
+              "type" : "boolean"
+            }
+          },
+          "required" : [ "fileUrl" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "list_available_assistants",
+        "description" : "Assistants exist that are capable of performing tasks and returning results. There are different types of\nassistants to provide different types of support.\n\nYou will be provided a list of available assistant configurations and you can choose an appropriate one for a given task.\n\nUse this tool to list the configuration registry of available assistants. Only Registered assistants can be invoked."
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "send_email",
+        "description" : "Use this tool to send email",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "sender" : {
+              "type" : "string",
+              "description" : "This is the identifier of the sender, it is a json object of the form:\n  {\n    \"emailAddress\":\"...\",\n    \"name\":\"\"\n  }\n\"name\" is optional."
+            },
+            "recipients" : {
+              "type" : "string",
+              "description" : "This is a json array representing the recipients of the email. The array is of the following form:\n[\n  {\n    \"emailAddress\":\"...\",\n    \"name\":\"...\"\n  }\n]  \n \nThe \"emailAddress\" is the recipient's email. The \"name\" is optional and when present represents the\nname of the recipient."
+            },
+            "subject" : {
+              "type" : "string",
+              "description" : "This is subject of the email message"
+            },
+            "attachments" : {
+              "type" : "string",
+              "description" : "This is a json array representing a list of file attachments. The array is of the following form:\n[\n  {\n    \"path\":\"../\",\n    \"description\":\"..\"\n  }\n]\n \nThe \"path\" is the path of the file to attach. \"name\" represents the name of the file \nand \"description\" describes the files."
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "This is the actual message to be sent. This message can be html snippet fit for html in emails, in other\nwords it can embed links,images..etc for html. \n\nWhen embedding local images via the\"img\" tag, the \"src\" attribute must always be the file path of the file that is being embedded.\nIf the file being embedded is a remote http url then just use the url as is."
+            },
+            "embeddedImages" : {
+              "type" : "string",
+              "description" : "This is a json array representing a list of local images embedded in the message via \"img\" tag. \nThe array is of the following form:\n[\n  {\n    \"path\":\"../\"\n  }\n]\nThe \"path\" field must be the same as the path specified in \"src\" attribute of the corresponding \"img\" tag.\nThis array must only include local file embeds, ie not files embedded via a remote http url."
+            }
+          },
+          "required" : [ "recipients", "subject", "message" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "text_content_reviewer",
+        "description" : "This tool can be used to allow for textual content to be reviewed before being used. This can be any kind\nof textual content, email, computer code ...etc. The reviewer will review and might modify the text as part of\nthe review.",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "contentType" : {
+              "type" : "string",
+              "description" : "This represents the syntax type of the content. ",
+              "enum" : [ "java", "javascript", "xml", "html", "css", "sql", "markdown", "yaml" ]
+            },
+            "taskTitle" : {
+              "type" : "string",
+              "description" : "Use this to provide a concise title for this request"
+            },
+            "content" : {
+              "type" : "string",
+              "description" : "This represents the actual content"
+            },
+            "contentTitle" : {
+              "type" : "string",
+              "description" : "Use this to provide a concise title for this content"
+            },
+            "taskMessage" : {
+              "type" : "string",
+              "description" : "This should be set to a message addressed to the fulfiller of this request, detailing what is being requested.\nThink of it as a message to the fulfiller of the request or task."
+            }
+          },
+          "required" : [ "taskTitle", "content", "taskMessage", "contentTitle" ]
+        }
+      }
+    } ],
+    "max_tokens" : 128000
+  },
+  "id" : "1753466558529",
+  "name" : "Integrated Services Assistant",
+  "isDefaultPromptContext" : true,
+  "exposeAsMenuAction" : true,
+  "useAIImplPlugin" : "default",
+  "useToolImplPlugins" : [ {
+    "backEndCodexx" : "import java.lang.reflect.InvocationTargetException;\nimport java.nio.file.*;\n\nimport org.graalvm.polyglot.Context;\nimport org.graalvm.python.embedding.*;\n\npublic class GraalPy {\n    static VirtualFileSystem vfs;\n\n    public static Context createPythonContext(String pythonResourcesDirectory) { // ?\n        return GraalPyResources.contextBuilder(Path.of(pythonResourcesDirectory)).build();\n    }\n\n    public static Context createPythonContextFromResources() {\n        if (vfs == null) { // ?\n            vfs = VirtualFileSystem.newBuilder().allowHostIO(VirtualFileSystem.HostIO.READ).build();\n        }\n        return GraalPyResources.contextBuilder(vfs).build();\n    }\n  \n    public static Context createPythonContextFromVirtualEnvironment(String useEnv=null){\n\t\tif (useEnv ==null && System.getProperty(\"venv\") == null) {\n            throw new Exception(\"Unable to run python, No virtual environment 'venv' specified in system property.\");\n        }\n      \n        //Path executable = Paths.get((useEnv != null?useEnv:System.getProperty(\"venv\")), \"bin\", \"python\");\n        Context context = Context.newBuilder(\"python\") // ?\n                .allowAllAccess(true)\n                .currentWorkingDirectory(Paths.get(useEnv))\n                //.option(\"python.Executable\", /*executable.toAbsolutePath().toString()*/useEnv) // ?\n                //.option(\"python.ForceImportSite\", \"true\") // ?\n                //.allowIO(IOAccess.newBuilder().allowHostFileAccess(true).build()) // ?\n                .build()\n           \treturn context;\n    }\n  \n    public static Context createPythonContextFromGraalEmbed(){\n\t\tString path = System.getProperty(\"graalpy.resources\");\n        if (path == null || path.isBlank() || path.equals(\"null\")) {\n            throw new Exception(\"Unable to access python code, 'graalpy.resources' system property.\");\n        }      \n        return GraalPy.createPythonContext(path);\n    }\n}\n\npublic class BackEndToolImplPluginForAgentBiomni{\n\tObject httpRequest;\n  \tObject httpResponse;\n  \tObject exec;\n  \tMap arguments;\n  \n  \tMap pluginContext;\n  \tObject moduleContext; \n  \n    Map config;\n    Map session;\n      \n    Object aiProviderInterface;\n  \tObject aiImplPlugin;\n    String PYTHON_MODE = \"virtual-environment\";\n  \n    Map toolDefinition = new HashMap();\n  \n    public BackEndToolImplPluginForAgentBiomni(){\n\n    }\n  \n    public BackEndToolImplPluginForAgentBiomni(Object httpRequest,Object httpResponse,Map arguments,Object exec){\n          this.arguments\t\t\t\t= arguments;\n          this.httpRequest \t\t\t\t= arguments.get(\"httpRequest\");\n          this.httpResponse \t\t\t= arguments.get(\"httpResponse\");\n          this.exec\t\t\t\t\t\t= exec;\n\t\t  this.pluginContext \t\t\t= arguments.get(\"pluginContext\");\n      \t  this.moduleContext \t\t\t= arguments.get(\"moduleContext\"); \n            \n          exec.logger().info(\"BackEndToolImplPluginForAgentBiomni\");\n    }  \n  \n    public BackEndToolImplPluginForAgentBiomni setAIContext(Object aiProviderInterface, Object aiImplPlugin){\n\t\tthis.aiProviderInterface = aiProviderInterface;\n  \t\tthis.aiImplPlugin = aiImplPlugin;\n      \treturn this;\n    }\n  \n    public Map initEvalContext(Map prompt,Map config,Map session,Object appBuilder,Object aiInterface,Object aiImplPlugin,Object tools){\n        //task,aiInterfacePlugin\n\t\t/*Map leadSource = \n        exec\n        .using(pluginContext.resolveToUserAssetDir(\"/\").getCanonicalPath()+\"/work/BusinessTools/web\")\n        .call(\"/secure/sales-lead-management/db-access/get_next_new_lead_source.stm\");\n      \n        if(leadSource == null)\n       \t\treturn [\"taskStatus\":\"no lead source to process\"];\n      \n        for(java.io.File entry :pluginContext.resolveToUserAssetDir(\"/work/sales-lead-processing\").listFiles()){\n      \t\tentry.delete();  \n        }      \n      \n        prompt.put(\"workingDir\",\"/work/sales-lead-processing\");\n        return [\n          leadSource:leadSource\n        ];*/\n        return new HashMap()\n    }\n\n    public Map invoke_biomedical_scientist(Map toolCallArgs,Map tool_call,Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n      \n\t\tMap respMsg = [\n            role:\"tool\",\n            tool_call_id:tool_call.id,\n            name:tool_call.function.name,\n            content:\"Scientist invoked.\"\n        ];\n      \n        if(toolCallArgs.instruction == null || toolCallArgs.instruction.isEmpty()){\n            respMsg.content = \"No valid instruction specified\";\n            return respMsg;\n        }\n      \n        String instruction = toolCallArgs.instruction;\n      \n        //List leads = String.class.isInstance(toolCallArgs.leads)?exec.add(\"solvent_javalang_class\",\"map\").eval(aiImplPlugin.jsonrepair(toolCallArgs.leads),\"json\"):toolCallArgs.leads;\n      \n        try\n        {\n            Context context;\n            if(PYTHON_MODE == \"virtual-environment\")\n          \t\tcontext = GraalPy.createPythonContextFromVirtualEnvironment(\"/home/ubuntu/biomni/Biomni/biomni_env\");\n            else\n            if(PYTHON_MODE == \"embedded-environment\")\n          \t\tcontext = GraalPy.createPythonContextFromGraalEmbed()\n          \n            Object biomniAgent = context.eval(\"python\", \"\"\"\n            from biomni.agent import A1\n\n            # Initialize the agent with data path, Data lake will be automatically downloaded on first run (~11GB)\n            agent = A1(path='./data', llm='claude-sonnet-4-20250514'); agent\"\"\");\n\n            Object resp = biomniAgent.go(instruction);\n            exec.logger().info(resp)\n            respMsg.content = resp;\n          \n            context.close();\n        }\n        catch(Exception e){\n          exec.logger().warn(e)\n          respMsg.content = \"Error invoking scientist, ${e.getMessage()}.\".toString();\n        }\n      \n        return respMsg;\n    }  \n  \n    public Object init(Map toolImplPluginConfig,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n       //toolDefinition = exec.call(\"<path to tool definitions>/toolDefs{}\");\n       return this;\n    }\n  \n    public Map preparePrompt(Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n\n          if(prompt.apiRequest == null)\n          \tprompt.put(\"apiRequest\",new HashMap());\n\n          if(prompt.apiRequest.tools == null)\n          \tprompt.apiRequest.put(\"tools\",new ArrayList());\n\n          //append tools provided by this plugin\n          if(prompt.toolDefinition != null && prompt.toolDefinition.defs != null)\n          \t prompt.apiRequest.tools.addAll(aiImplPlugin.cloneObject(prompt.toolDefinition.defs));\n\n          List dedupTools = new ArrayList();\n          for(Map tool : prompt.apiRequest.tools){\n              if(!aiImplPlugin.isInList(dedupTools,t->t.function.name.equals(tool.function.name)))\n                  dedupTools.add(tool);\n          }\n          prompt.apiRequest.put(\"tools\",dedupTools);\n\n          if(prompt.apiRequest.tool_choice == null)\n          \tprompt.apiRequest.put(\"tool_choice\",\"auto\");\n\n          return prompt;          \n    }\n  \n    public List getTools(Map prompt,Map config,Map session,Object appBuilder,Object aiProviderInterface,Object aiImplPlugin){\n      \treturn getTools(prompt,config,session,aiProviderInterface,aiImplPlugin);\n    }\n  \n    public List getTools(Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n        return (prompt.toolDefinition != null  && prompt.toolDefinition.defs != null)?aiImplPlugin.cloneObject(prompt.toolDefinition.defs):new ArrayList();\n    }\n  \n    public boolean isKnownAITool(Map tool_call,Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n        if(prompt.toolDefinition != null  && prompt.toolDefinition.defs != null){\n            for(Map tool: prompt.toolDefinition.defs){\n               if(tool.function.name.equals(tool_call.function.name)) \n                  return true;\n            }\n        }\n        return false;\n    }\n  \n    public Object executeToolCall(Map tool_call,Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n        Map toolCallArgs = new HashMap();\n        if(tool_call.function.arguments != null)\n         \ttoolCallArgs = String.class.isInstance(tool_call.function.arguments)?exec.add(\"solvent_javalang_class\",\"map\").eval(tool_call.function.arguments,\"json\"):tool_call.function.arguments;\n      \n        String executionEnvironment = prompt.executionEnvironment;\n        if(toolCallArgs.executionEnvironment != null && !toolCallArgs.executionEnvironment.equals(\"any\"))\n           executionEnvironment = toolCallArgs.executionEnvironment;\n          \n        if(executionEnvironment != null && executionEnvironment.equals(\"front-end\"))\n          \treturn [sendToClient:true];      \n      \n      \ttry\n        {\n        \treturn this.getClass().getMethod(tool_call.function.name,Map.class,Map.class,Map.class,Map.class,Map.class,Object.class,Object.class).invoke(this,toolCallArgs,tool_call,prompt,config,session,aiProviderInterface,aiImplPlugin);\n        } \n        catch(InvocationTargetException e) {\n            throw e.getCause();\n        }\n    }\n}\n\nreturn new BackEndToolImplPluginForAgentBiomni(arguments.get(\"httpRequest\"),arguments.get(\"httpResponse\"),arguments,exec);\n",
+    "frontEndCode" : "\nlet toolImpl = {\n   \t\t\"toolDefinition\":{},\n        initEvalContext:async function(prompt,config,session,appBuilder,aiInterface,aiImplPlugin,tools=null){\n           if(true)\n             return {};\n          \n           const options = {\n              \"year\": 'numeric',\n              \"month\": '2-digit',\n              \"day\": '2-digit',\n           }\n           let formattedDate =  new Intl.DateTimeFormat('en-US',options).format(new Date());\n          \n           const avRecorderConfig = config.shared.miscSettings.taskSchedule.avRecorder;\n           const audioVisualRecordingDirPath = avRecorderConfig.audioVisualRecordingDirPath?avRecorderConfig.audioVisualRecordingDirPath:\"/solvent-temp/botworx/audiovisual-recordings\";\n\n           const now = new Date();\n           const month = now.toLocaleString('default', { month: 'long' });\n           const currentAVDirPath = `${audioVisualRecordingDirPath}/${now.getUTCFullYear()}/${month}/${formattedDate.replaceAll(\"/\",\"-\")}/image`;\n          \n           let latest = null\n           const fileInfo = await appBuilder.runtime_resources.checkFileExists(currentAVDirPath);\n           if(fileInfo.exists){\n          \n               //const dirListing  = await appBuilder.runtime_resources.getDirListing(currentAVDirPath);\n               const dirListing  = await appBuilder.runtime_resources.getDirListing(currentAVDirPath,null,null,null,false,false,true);\n             \n               if(dirListing.files){\n                   for(const file of dirListing.files){\n                      if(!file.isDir && file.relPath.endsWith(\".jpeg\")){\n                         if(latest == null){\n                           latest = file;\n                           continue;\n                         }\n\n                         if(file.metadata.lastModifiedTimeStamp > latest.metadata.lastModifiedTimeStamp)\n                           latest = file;\n                      }\n                   }\n               }\n           }\n           prompt.skipTTS = true;\n           prompt.workingDir = \"/\";\n          \n           return {\"visionFilePath\":(latest?latest.relPath:\"\")};\n        },\n        draw_shape:async function(toolCallArgs,tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n            const respMsg = {\n              \"role\":\"tool\",\n              \"tool_call_id\":tool_call.id,\n              \"name\":tool_call.function.name,\n              \"content\":\"Shape drawn.\"\n            };\n          \n            return respMsg;\n        },\n        init:async function(toolImplPluginConfig,config,session,appBuilder,aiInterface,radkitIDEPlugin){\n             const _this = this;\n             \n             return new Promise((resolve,reject)=>{\n                   /*\n                   appBuilder.sendRequest({\n                     type:'POST',\n                     dataType:\"json\",\n                     data:{},\n                     url:(\"/integration/ai/tools/toolDefs{}\")\n                   },toolImplPluginConfig.fqName).\n                   then(function(resp){\n                       _this.toolDefinition = resp;\n                       resolve(_this);\n                   });\n                   */\n                   resolve(_this);\n             });             \n        },\n      \tpreparePrompt:async function(prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n             \n            if(!prompt.apiRequest)\n              prompt[\"apiRequest\"]  = {};\n\n            if(!prompt.apiRequest.tools)\n              prompt[\"apiRequest\"][\"tools\"] = [];\n\n            //append tools provided by this plugin\n            if(prompt.toolDefinition && prompt.toolDefinition.defs){\n                const toolDefinitions = aiImplPlugin.parse(aiImplPlugin.stringify(prompt.toolDefinition.defs));\n                prompt.apiRequest.tools.push(...toolDefinitions);\n            }\n          \n            const dedupTools = [];\n            for(const tool of prompt.apiRequest.tools){\n              if(!dedupTools.find(t=>t.function.name == tool.function.name))\n                dedupTools.push(tool);  \n            }\n            prompt.apiRequest[\"tools\"] = dedupTools;\n          \n            if(!prompt.apiRequest.tool_choice)\n              prompt.apiRequest[\"tool_choice\"] = \"auto\";\n               \n            return prompt;\n        },\n        getTools:function(prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n        \tconst toolDefinitions = (prompt.toolDefinition && prompt.toolDefinition.defs)?aiImplPlugin.parse(aiImplPlugin.stringify(prompt.toolDefinition.defs)):[];\n            return toolDefinitions;\n        },\n\t\tisKnownAITool:function(tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n           return (typeof this[tool_call.function.name] == \"function\");\n        },\n        executeToolCool:async function(tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n           let toolCallArgs = {};\n           if(tool_call.function.arguments)\n                toolCallArgs = typeof tool_call.function.arguments == \"string\"?aiImplPlugin.parse(tool_call.function.arguments):tool_call.function.arguments;\n          \n           let executionEnvironment = prompt.executionEnvironment;\n           if(toolCallArgs.executionEnvironment && toolCallArgs.executionEnvironment != \"any\")\n             \texecutionEnvironment = toolCallArgs.executionEnvironment;\n          \n           if(executionEnvironment && executionEnvironment == \"back-end\")\n          \t\treturn {\"processOnServer\":true};          \n          \n           return await this[tool_call.function.name](toolCallArgs,tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin);\n        }\n};\nPromise.resolve(toolImpl);\n",
+    "backEndCodePath" : "/solvent-tests/ai-tool-code/DocProcessor.ste",
+    "frontEndCodePathxx" : "/solvent-tests/my-ai-tools/LightWeightToolImpl.js",
+    "name" : "default"
+  } ],
+  "toolDefinition" : {
+    "defs" : [ {
+      "type" : "function",
+      "function" : {
+        "name" : "extract_pdf_text",
+        "description" : "This tool extracts text from pdf document",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string",
+              "description" : "this is the file path of the pdf to extract"
+            }
+          },
+          "required" : [ "filePath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "upload_file_to_cloud_storage",
+        "description" : "This tool uploads the specified file to a cloud storage service",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string",
+              "description" : "this is the file path of the file to store"
+            }
+          },
+          "required" : [ "filePath" ]
+        }
+      }
+    } ]
+  },
+  "writeContextToClipboard" : ".txt,.ai,.json,.css,.svg,.html,.htm",
+  "useSessionProfile" : "gemini",
+  "fileSystemContextIncludes" : {
+    "default" : {
+      "files" : [ {
+        "path" : "/solvent-tests/ai-fs-test/saved-poem.txt",
+        "isDir" : false
+      } ],
+      "name" : "Include additional files"
+    }
+  },
+  "toolSetOverride" : [ "save_to_file", "read_from_file", "list_dir", "move_file", "copy_file", "rename_file", "delete_file", "create_file", "linux_shell", "extract_pdf_text", "upload_file_to_cloud_storage" ],
+  "invokeContext" : {
+    "contextData" : {
+      "promptText" : null,
+      "fileSystemContextIncludes" : {
+        "default" : {
+          "files" : [ ],
+          "name" : "Include additional files"
+        }
+      }
+    },
+    "hooks" : {
+      "frontEnd" : {
+        "vueConfig" : "(function(invokeContextVueConfigCntx){\n   const _global = window;\n   const {config,prompt,aiInterface,aiImplPlugin,appBuilder,isModalUI} = invokeContextVueConfigCntx;\n\n   return {\n\t \"watch\":{ \n     },\n     \"mounted\":async function(vueInstance,stage,prompt,promptEditor,idPrefix,appBuilder,modal){\n         if(stage == \"before\"){\n\t\t\t\n         }\n         else\n         {\n            vueInstance.$nextTick(async ()=>{\n                if(!modal){\n                    \n                    \n                }\n            });\n         }\n     },\n     \"methods\":{\n         \"onPromptProcessed\":async function(appBuilder,aiInterface,aiImplPlugin,config,session,prompt,resp){\n             console.log(\"onPromptProcessed Biomni\");\n\n             try\n             {\n                 const respPrompt = aiInterface.getImplModule().getLastPrompt(session,prompt.sourceId);\n                 if(!respPrompt)\n                   return;\n\n                 const output = aiInterface.getImplModule().getPromptOutput(respPrompt);\n                 if(output){\n                     const audioOutputPrompt = await aiInterface.getImplModule().generateSpeech(session,prompt,output,true);\n\n                     if(audioOutputPrompt)\n                         aiInterface.getImplModule().autoPlayAudio(audioOutputPrompt.textAudio); \n                 }\n               \n                 if(false && output.trim().indexOf(\"concerningObservation\") != -1){\n                     const concerningObservation = aiImplPlugin.getStructuredOutputValue(output,\"concerningObservation\");\n                     if(concerningObservation && concerningObservation.trim() == \"true\"){\n                          const descriptionOfObservation = aiImplPlugin.getStructuredOutputValue(output,\"descriptionOfObservation\");\n                          if(descriptionOfObservation && descriptionOfObservation.trim().length>0){\n                              const audioOutputPrompt = await aiInterface.getImplModule().generateSpeech(session,prompt,descriptionOfObservation,true);\n\n                              if(audioOutputPrompt)\n                                  aiInterface.getImplModule().autoPlayAudio(audioOutputPrompt.textAudio);                \n                          }\n                     }\n                 }\n             }\n             catch(error){\n                 appBuilder.browserLogger.warn(error,prompt);\n                 appBuilder.blockUI(appBuilder.common_core.blockUIConfig(`Error extracting Term's observations, ${error}, see error logs for details...`),true);\n             }\t\t\t \n         }\n     }\n    }\n})(invokeContextVueConfigCntx);"
+      },
+      "backEnd" : {
+        "beforeInvoke" : null,
+        "afterInvoke" : null
+      }
+    }
+  },
+  "useAssistants" : [ ],
+  "skipProgram" : false,
+  "dialogText" : "---begin-prompt---\nBelow is information that will help you in performing the requested task, it might be instructions or just be additional information, use it as appropriate:\n${botworx-await aiImplPlugin.getInstructions(prompt,(aiImplPlugin.isDefined(prompt.invokeContext.contextData.promptText) && aiImplPlugin.objectSize(prompt.invokeContext.contextData.promptText) > 0),false,true,(aiImplPlugin.isDefined(session)?session.id:null))}\n---end-prompt---",
+  "taskSchedule" : {
+    "seqGroupId" : null,
+    "sequenceNumber" : null,
+    "useSessionProfile" : "gemini",
+    "autoStart" : false,
+    "runAsUser" : "0",
+    "period" : {
+      "sleepInterval" : 60,
+      "runLimit" : 10
+    },
+    "scheduleHandler" : {
+      "scriptType" : "groovy",
+      "script" : "\npublic class ScheduleHandler{\n\tObject httpRequest;\n  \tObject httpResponse;\n  \tObject exec;\n  \tMap arguments;\n  \n  \tMap pluginContext;\n  \tObject moduleContext; \n  \n    Map config;\n    Map session;\n      \n    Object aiInterfacePlugin;\n  \tObject aiImplPlugin;\n\n    public ScheduleHandler(){\n\n    }\n\n    public ScheduleHandler(Object httpRequest,Object httpResponse,Map arguments,Object exec){\n          this.arguments\t\t\t\t= arguments;\n          this.httpRequest \t\t\t\t= arguments.get(\"httpRequest\");\n          this.httpResponse \t\t\t= arguments.get(\"httpResponse\");\n          this.exec\t\t\t\t\t\t= exec;\n\t\t  this.pluginContext \t\t\t= arguments.get(\"pluginContext\");\n      \t  this.moduleContext \t\t\t= arguments.get(\"moduleContext\"); \n            \n          exec.logger().info(\"ScheduleHandler\");\n    }  \n\n    public String process(Map automation,Object aiInterfacePlugin,Object task){\n        //task,aiInterfacePlugin\n\t\tMap newLeadSource = exec.using(pluginContext.resolveToUserAssetDir(\"/\")).call(\"/work/BusinessTools/web/secure/sales-lead-management/db-access/get_next_new_lead_source.stm\");\n      \n        if(newLeadSource == null)\n      \t\texec.logger().info(\"Agent ${automation.name} is skipping action, no lead sources to extract from.\".toString());\n      \telse\n          exec.logger().info(\"Agent ${automation.name} is extracting from a new lead source (${newLeadSource.website_url}).\".toString());\n      \n        return newLeadSource == null?\"skip\":true;\n    }\n}\n\nreturn new ScheduleHandler(arguments.get(\"httpRequest\"),arguments.get(\"httpResponse\"),arguments,exec).process(automation,aiInterfacePlugin,task);\n"
+    }
+  },
+  "contextLimit" : -1,
+  "executionEnvironment" : "back-end",
+  "mediaSettings" : {
+    "ttsEnabled" : false,
+    "useTTSProfiles" : [ "watchman" ]
+  },
+  "assistantSetOverride" : [ ],
+  "skipMTT" : true,
+  "skipTTS" : true,
+  "humanInLoopTools" : {
+    "text_content_reviewer" : {
+      "appURL" : "/HumanInLoop/appserver/text-reviewer/App{}.index.html",
+      "appDirPathx" : "/work/HumanInLoop",
+      "name" : "text_content_reviewer",
+      "appLabel" : "Text Content Reviewer",
+      "enternalWindow" : false
+    }
+  },
+  "extendedInstructions" : "  Addressing the supervisor(${prompt.promptData.supervisorName})\n  --------------------------------------------------------------\n  When asking questions (including interactive questions), you must always first address the supervisor by name(${prompt.promptData.supervisorName}) to get their attention, followed\n  by your questions, you ${prompt.promptData.requireSupervisorAck} wait for them to acknowledge you before asking the questions.\n  Additionally, you must always identify yourself by alias (${prompt.promptData.employeeName}) and role (${prompt.promptData.employeeRole}).\n  \n  /*@commentYou must use the interactive question form. All responses to questions should be thought of as coming from\n  the supervisor(${prompt.promptData.supervisorName}), in other words any mention of \"user\" in question response is referring to the supervisor, regardless of which media it is respresented in.*/\n  \n  You must not make an explicit reference to \"user\" responses since the response is coming from the supervisor(${prompt.promptData.supervisorName}),\n  just address them directly when responding to a question response. In other words don't respond to supervisor(${prompt.promptData.supervisorName}) as \"user\" in the\n  third-person, address them directly when referring to the supervisor's own response to your questions.\n  \n  When the supervisor(${prompt.promptData.supervisorName}) provides a directive or answers a question, always\n  acknowledge your understanding and state or reiterate your next action, unless it is a very simple directive then you can just perform necessary tasks.  \n  \n  If your task involves a third-party or other relevant entity, when appropriate, mention such entities when\n  addressing the supervisor. You want the supervisor to have enough detail to know what you are doing but\n  not too much detail.  \n  \n  When refering to yourself\n  ---------------------------\n  When refering to yourself, do not mention actions such as reading of image, just refer to the content of\n  the image as opposed to the fact that you read it.\n  \n  You should simple speak in terms of the things you are seeing and observing and not make any mention of the fact that\n  you are looking at an image.\n    \n  The goal is for you to speak in the first-person as a \"${prompt.promptData.employeeRole}\" performing\n  your role, not as a software performing computing tasks. Speak in terms of activities related to your\n  role, not activities specific to computers. Computer related tasks that you perform as part of completing\n  your duty should not be commented upon, only the high-level activities should be relayed to your\n  supervisor.  \n  \n  Accessing Functions and Tools\n  ------------------------------  \n  When invoking tools and function in order to perform your duty, some of the tools may accept \"taskMessage\" as\n  one of the arguments, you must use that to address the supervisor(${prompt.promptData.supervisorName}), you must use\n  the rules outlined above about addressing your supervisor(${prompt.promptData.supervisorName}) to specify the \"taskMessage\".\n    \n  Summarizing your actions and status updates\n  --------------------------------------------\n  When interacting with your supervisor, it will likely be a turn-by-turn conversation. The supervisor will\n  ask you to perform a task or set of tasks or will provide you information to further act on.\n  \n  At each turn, when the tasks for which you are currently acting are complete or suspended, then you can summarize a status\n  message addressed to your supervisor. Intermediate activies do not require status update and you do not\n  need to tell your supervisor every activity you are about to perform.\n  \n  If the supervisor tells you to do something in a given turn, you can summarize your understanding of their \n  requests and then proceed, you should only summarize your understanding if the request is complicated and involves multiple\n  actions. For simple requests, just perform the activity and respond with an address to your supervisor summarizing and confirming what you did\n  at a high-level.\n  \n  At each turn, confirmation and summarization of your status to your supervisor must be the very last thing you\n  do after performing all other activities, including supporting computing activities.\n  \n  The summary and confirmation must include what you did (high-level overview) since your supervisor's last turn in the conversation.\n",
+  "leadSources" : {
+    "hn" : {
+      "instructions" : "The provided URL will take you to the main page with links pointing to individual stories.\nYou should be looking for stories about AI (ie Artificial Intelligences). For\neach such story, you should extract the discussion page by extracting the discussion/comment URL.\nNot that for the task, you will only nagivate the provided domain, meaning your task will not involve\nextracting content from domains other than the one specified above.\n\nThe link patterns of the form \"user?id=${..}\" represent links to user profiles.\nThe element \"<span class=\"titleline\">\" represents the new story title. In particular, do not extract the links inside the \"titleline\" element.\nThe link patterns of the form \"<a href=\"item?id=${..}\">comments</a>\" represent the discussion/comment page, this is the link you should be interested in.\n\nAs a first task, you must examine the full html before attempting to extract story list information.\nIt is possible that the patterns noted above have changed, they are meant to help you but you\nmust ultimately examine the html page in order to get the information about stories.\n\nExtract the stories into a json file with the title and the comment links included as the two fields in each entry\nas the two fields, then use that to perform the rest of your duty. The comment link should\nbe made into a full url if it is a relative url.\n\nAs with the stories, you must examine the full html of the comment page to determine lead prospects.\n\nThe discussion/comments page will be full of comments, you should examine the comments to determine\nposts that seem to indicate the person is interested in AI capabilities. They may\nfor instance indicate they are already using AI in some form, they may have a negative or\npositive sentiment.\n\nWhen you determine that a post is a possible lead, you must determine if they have at least\ncontact information or their name or a link to a URL in their profile, \nif they are missing all 3 elements then skip that poster. \n\n\nOnce you have determined a poster is a suitable lead, you must craft a note on them. The note should\nstate why you think they are a good lead, the note should be descriptive, meaning it must be framed\nin terms of describing the poster's profile as a sales lead.\n\nA poster may have many comments, you can use all their comments to craft your profile notes about \nthem.\n\nIn summary, following this general approach to perform the instructions noted above:\n\n1.Extract full page html of the lead source url\n  Extract and save all stories to a file as json and include the full discussion/comment page url as a field\n  Filter out all stories not related to AI and save the file\n\n2.For each entry in the file, extract the full html of the discussion/comment page\n  Extract possible leads based on comments into a file as json entries along with the full html link the profile of the poster. \n    As part of the extract makes sure you craft the profile note on the possible lead\n  Save the possible leads json extract in a file\n  \n3.For each entry in the possible leads file extract the full html of the profile to determine if they are a valid lead per guidlines above.\n  Update the leads extract so that it contains only valid leads per guidelines noted above\n  Save the updated list of valid leads to json file.\n  \n\n"
+    }
+  },
+  "requireUserInstructions" : true,
+  "enableDynamicToolUseResolution" : false,
+  "enableDynamicAssistantUseResolution" : false,
+  "pythonCode" : {
+    "initA1Agent" : "from biomni.agent import A1\n\n# Initialize the agent with data path, Data lake will be automatically downloaded on first run (~11GB)\nagent = A1(path='./data', llm='claude-sonnet-4-20250514'); agent",
+    "invokeA1Agent" : "import json\nfrom biomni.agent import A1\n\n# Initialize the agent with data path, Data lake will be automatically downloaded on first run (~11GB)\nagent = A1(path='./data', llm='claude-sonnet-4-20250514'); \n\n#read from file input.txt and set instruction then write output to file. \n#complete the code below in python, don't explain.\nwith open('input.txt', 'r') as file:\n    instruction = file.read().strip()\n\noutput = agent.go(instruction)\n\nwith open('output.txt', 'w') as file:\n    file.write(json.dumps(output))",
+    "invokeBiomni" : "#!/bin/bash\n\nexport ANTHROPIC_API_KEY=\"API_KEY\"\n\nconda init\n\nconda activate biomni_e1\n\npython invoke_biomni.py\n\nconda deactivate "
+  }
+}

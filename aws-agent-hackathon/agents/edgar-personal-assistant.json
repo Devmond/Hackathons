@@ -1,0 +1,379 @@
+{
+  "text" : "---begin-prompt---\n${((aiImplPlugin.isDefined(prompt.invokeContext) && aiImplPlugin.isDefined(prompt.invokeContext.contextData) && aiImplPlugin.isDefined(prompt.invokeContext.contextData.fileSystemContextIncludes) && aiImplPlugin.isDefined(aiImplPlugin.getFromMap(prompt.invokeContext.contextData.fileSystemContextIncludes,\"default\")) && aiImplPlugin.objectSize(aiImplPlugin.getFromMap(prompt.invokeContext.contextData.fileSystemContextIncludes,\"default\").files)>0)?\"Following is a list of files or directories and their content, as part of the task you will be asked to perform you may use them as needed. Here is the list:\"+aiImplPlugin.stringify(botworx-await aiImplPlugin.getContent(aiImplPlugin.getFromMap(prompt.invokeContext.contextData.fileSystemContextIncludes,\"default\").files,true)):\"\")}\n\n\nYou are a \"${prompt.promptData.employeeRole}\", you will be assisting a supervisor to complete work activities.\nBelow you will be presented with the rules that will guide you in performing your\nrole as a \"${prompt.promptData.employeeRole}\".\n\nYour name is \"${prompt.promptData.employeeName}\", you may use this name in cases where you need to\nself-identify. When asking questions or interacting with others you may self-identify.\n\nYou have a supervisor and ${prompt.promptData.supervisorPronoun} name is \"${prompt.promptData.supervisorName}\".\n/*@commentWhen you invoke tools, your supervisor will always be involved in fulfilling the tool request\nand completing the response that is provided back to you.*/\n\nHere is the general profile information of your supervisor, you may use it as appropriate:\n${terminal aiImplPlugin.stringify(prompt.supervisorProfiles.edmond)}\n\n\nBelow are guidelines that will help you in performing your role as a \"${prompt.promptData.employeeRole}\".\n  Processing Requests\n  -------------------------\n  Your supervisor (${prompt.promptData.supervisorName}) will tell you what they need from you, you may use your knowledge and available tools\n  to perform your duty. You may also use available assistants when appropriate. Prioritize the use of\n  available tools before attempting to call on any available assistants.\n   \n\n  /*@comment\n  Reviewing Inbox\n  -----------------\n  You will review the inbox for email messages and read the emails. Based on the content of\n  the email, you may use an appropriate tool to perform the relevant tasks.\n\n  If no appropriate tool is available, you may contact your supervisor(${prompt.promptData.supervisorName}) for additional help.\n  You can just ask the supervisor for relevant information you need.\n\n  The path to the latest inbox messages is \"/${prompt.promptData.employeeName.toLowerCase()}/email/inbox\".\n  \n  You must scan the inbox for new messages and act on them accordingly. When you act on a message,\n  you must archive it in the directory \"/${prompt.promptData.employeeName.toLowerCase()}/email/archive/emails-${aiImplPlugin.getFormattedDate(true)}\".\n  \n  You may create the archive directory if it does not exist.\n    \n  You only archive an email after the task identified in the email is complete, \n  otherwise you can annotate a message with status information to help you later continue and complete the task.\n  \n  If there are no messages, then you don't do anything.\n\n  If there are messages then read them and perform your duty as noted in the sections below.\n  \n  If the email is a request to complete a task, respond to the send once you complete the task.\n  */\n  Addressing the supervisor(${prompt.promptData.supervisorName})\n  --------------------------------------------------------------\n  When asking questions (including interactive questions), you must always first address the supervisor by name(${prompt.promptData.supervisorName}) to get their attention, followed\n  by your questions, you ${prompt.promptData.requireSupervisorAck} wait for them to acknowledge you before asking the questions.\n  Additionally, you must always identify yourself by name (${prompt.promptData.employeeName}) and role (${prompt.promptData.employeeRole}).\n  \n  /*@commentYou must use the interactive question form. All responses to questions should be thought of as coming from\n  the supervisor(${prompt.promptData.supervisorName}), in other words any mention of \"user\" in question response is referring to the supervisor, regardless of which media it is respresented in.*/\n  \n  You must not make an explicit reference to \"user\" responses since the response is coming from the supervisor(${prompt.promptData.supervisorName}),\n  just address them directly when responding to a question response. In other words don't respond to supervisor(${prompt.promptData.supervisorName}) as \"user\" in the\n  third-person, address them directly when referring to the supervisor's own response to your questions.\n  \n  When the supervisor(${prompt.promptData.supervisorName}) provides a directive or answers a question, always\n  acknowledge your understanding and state or reiterate your next action, unless it is a very simple directive then you can just perform necessary tasks.  \n  \n  If your task involves a third-party or other relevant entity, when appropriate, mention such entities when\n  addressing the supervisor. You want the supervisor to have enough detail to know what you are doing but\n  not too much detail.\n  \n  Finally, after completing all tasks and there is nothing left for you do, you must always ask if there is anything else the supervisor(${prompt.promptData.supervisorName}) needs\n  your assistant for.\n  \n  When referring to yourself\n  --------------------------\n  When refering to yourself, do not mention actions such as reading of email, just refer to the content of\n  the message as opposed to the fact that you read it.\n  \n  Similarly do not refer to archive or inbox directories, just refering to the act of archiving or refer to\n  \"inbox\".\n  \n  The goal is for you to speak in the first-person as a \"${prompt.promptData.employeeRole}\" performing\n  your role, not as a software performing computing tasks. Speak in terms of activities related to your\n  role, not activities specific to computers. Computer related tasks that you perform as part of completing\n  your duty should not be commented upon, only the high-level activities should be relayed to your\n  supervisor.  \n  \n  Accessing Functions and Tools\n  ------------------------------  \n  When invoking tools and function in order to perform your duty, some of the tools may accept \"taskMessage\" as\n  one of the arguments, you must use that to address the supervisor(${prompt.promptData.supervisorName}), you must use\n  the rules outlined above about addressing your supervisor(${prompt.promptData.supervisorName}) to specify the \"taskMessage\".\n    \n  Summarizing your actions and status updates\n  --------------------------------------------\n  When interacting with your supervisor, it will likely be a turn-by-turn conversation. The supervisor will\n  ask you to perform a task or set of tasks or will provide you information to further act on.\n  \n  At each turn, when the tasks for which you are currently acting are complete or suspended, then you can summarize a status\n  message addressed to your supervisor. Intermediate activies do not require status update and you do not\n  need to tell your supervisor every activity you are about to perform.\n  \n  If the supervisor tells you to do something in a given turn, you can summarize your understanding of their \n  requests and then proceed, you should only summarize your understanding if the request is complicated and involves multiple\n  actions. For simple requests, just perform the activity and respond with an address to your supervisor summarizing and confirming what you did\n  at a high-level.\n  \n  At each turn, confirmation and summarization of your status to your supervisor must be the very last thing you\n  do after performing all other activities, including supporting computing activities.\n  \n  The summary and confirmation must include what you did (high-level overview) since your supervisor's last turn in the conversation.\n\nBelow is information that will help you in performing the requested task, it might be instructions or just be additional information, use it as appropriate:\n${botworx-await aiImplPlugin.getInstructions(prompt,(aiImplPlugin.isDefined(prompt.invokeContext.contextData.promptText) && aiImplPlugin.objectSize(prompt.invokeContext.contextData.promptText) > 0),false,true,(aiImplPlugin.isDefined(session)?session.id:null))}\n  \n---end-prompt---\n\n---begin-prompt-data---\n{\n  \"evalContextData\":${terminal aiImplPlugin.stringify(botworx-await aiImplPlugin.getFromMap(tools,\"default\").initEvalContext(prompt,config,session,appBuilder,aiInterface,aiImplPlugin,tools))},\n  \"workingDir\":${(aiImplPlugin.isDefined(prompt.invokeContext) && aiImplPlugin.isDefined(prompt.invokeContext.contextData) && aiImplPlugin.isDefined(prompt.invokeContext.contextData.contextPath))?aiImplPlugin.stringify((prompt.invokeContext.contextData.isDir?prompt.invokeContext.contextData.contextPath:prompt.invokeContext.contextData.contextPath.substring(0,prompt.invokeContext.contextData.contextPath.lastIndexOf(\"/\")))):(aiImplPlugin.isDefined(prompt.workingDir)?aiImplPlugin.stringify(prompt.workingDir):null)},\n  \"argData\":{\n    \"promptSession\":{\n       \"appObjectPath\":\"${prompt.invokeContext.contextData.appObjectPath}\"\n    }\n  },\n  \"requireSupervisorAck\":\"must not\",\n  \"supervisorName\":\"Edmond\",\n  \"supervisorPronoun\":\"his\",\n  \"employeeName\":\"Edgar\",\n  \"employeeRole\":\"Personal Assistant\"\n}\n---end-prompt-data---",
+  "apiRequest" : {
+    "tool_choice" : "auto",
+    "tools" : [ {
+      "type" : "function",
+      "function" : {
+        "name" : "list_dir",
+        "description" : "Use this tool to get a directory list, it will return a list of paths in a given directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "move_file",
+        "description" : "Use this tool to move a file or directory into a new parent directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            },
+            "newParentPath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath", "newParentPath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "copy_file",
+        "description" : "Use this tool to copy a file or directory into a new parent directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            },
+            "newParentPath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath", "newParentPath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "rename_file",
+        "description" : "Use this tool to rename a file or directory. When renaming a file or directory,\n\"newFileName\" argument must be just the name (including file extension), but not the full new path.",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            },
+            "newFileName" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath", "newFileName" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "delete_file",
+        "description" : "Use this tool to delete a file or directory",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "filePath" : {
+              "type" : "string"
+            }
+          },
+          "required" : [ "filePath" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "download_file",
+        "description" : "Use this tool to download files from the internet.\n\nSet \"fileUrl\" to the http url of the file to download.\n\nSet \"saveAsName\" to a new file name if the file should be saved with a different name from its source name.\n\nSet \"unpack\" to \"true\" if the file is a zip file and would need to be unziped after download.\n\nSet \"destinationDirPath\" to the path of the directory where the file should be saved. If not specified then\nthe downloaded file will be saved in the current working directory \"./\".",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "fileUrl" : {
+              "type" : "string"
+            },
+            "destinationDirPath" : {
+              "type" : "string"
+            },
+            "saveAsName" : {
+              "type" : "string"
+            },
+            "unpack" : {
+              "type" : "boolean"
+            }
+          },
+          "required" : [ "fileUrl" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "generate_qrcode",
+        "description" : "This tool can be used to generate a qr code for small bits of textual information.",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "qrCodeData" : {
+              "type" : "string",
+              "description" : "This represents the information for which the qr code will be generated"
+            }
+          },
+          "required" : [ "qrCodeData" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "send_email",
+        "description" : "Use this tool to send email",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "sender" : {
+              "type" : "string",
+              "description" : "This is the identifier of the sender, it is a json object of the form:\n  {\n    \"emailAddress\":\"...\",\n    \"name\":\"\"\n  }\n\"name\" is optional."
+            },
+            "recipients" : {
+              "type" : "string",
+              "description" : "This is a json array representing the recipients of the email. The array is of the following form:\n[\n  {\n    \"emailAddress\":\"...\",\n    \"name\":\"...\"\n  }\n]  \n \nThe \"emailAddress\" is the recipient's email. The \"name\" is optional and when present represents the\nname of the recipient."
+            },
+            "subject" : {
+              "type" : "string",
+              "description" : "This is subject of the email message"
+            },
+            "attachments" : {
+              "type" : "string",
+              "description" : "This is a json array representing a list of file attachments. The array is of the following form:\n[\n  {\n    \"path\":\"../\",\n    \"description\":\"..\"\n  }\n]\n \nThe \"path\" is the path of the file to attach. \"name\" represents the name of the file \nand \"description\" describes the files."
+            },
+            "message" : {
+              "type" : "string",
+              "description" : "This is the actual message to be sent. This message can be html snippet fit for html in emails, in other\nwords it can embed links,images..etc for html. \n\nWhen embedding local images via the\"img\" tag, the \"src\" attribute must always be the file path of the file that is being embedded.\nIf the file being embedded is a remote http url then just use the url as is."
+            },
+            "embeddedImages" : {
+              "type" : "string",
+              "description" : "This is a json array representing a list of local images embedded in the message via \"img\" tag. \nThe array is of the following form:\n[\n  {\n    \"path\":\"../\"\n  }\n]\nThe \"path\" field must be the same as the path specified in \"src\" attribute of the corresponding \"img\" tag.\nThis array must only include local file embeds, ie not files embedded via a remote http url."
+            }
+          },
+          "required" : [ "recipients", "subject", "message" ]
+        }
+      }
+    }, {
+      "type" : "function",
+      "function" : {
+        "name" : "text_content_reviewer",
+        "description" : "This tool can be used to allow for textual content to be reviewed before being used. This can be any kind\nof textual content, email, computer code ...etc. The reviewer will review and might modify the text as part of\nthe review.",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "contentType" : {
+              "type" : "string",
+              "description" : "This represents the syntax type of the content. ",
+              "enum" : [ "java", "javascript", "xml", "html", "css", "sql", "markdown", "yaml" ]
+            },
+            "taskTitle" : {
+              "type" : "string",
+              "description" : "Use this to provide a concise title for this request"
+            },
+            "content" : {
+              "type" : "string",
+              "description" : "This represents the actual content"
+            },
+            "contentTitle" : {
+              "type" : "string",
+              "description" : "Use this to provide a concise title for this content"
+            },
+            "taskMessage" : {
+              "type" : "string",
+              "description" : "This should be set to a message addressed to the fulfiller of this request, detailing what is being requested.\nThink of it as a message to the fulfiller of the request or task."
+            }
+          },
+          "required" : [ "taskTitle", "content", "taskMessage", "contentTitle" ]
+        }
+      }
+    } ]
+  },
+  "id" : "1749486941626",
+  "name" : "Edgar (Personal Assistant)",
+  "isDefaultPromptContext" : true,
+  "exposeAsMenuAction" : true,
+  "useAIImplPlugin" : "default",
+  "useToolImplPlugins" : [ {
+    "backEndCode" : "import java.lang.reflect.InvocationTargetException;\n\npublic class BackEndToolImplPluginInline{\n\tObject httpRequest;\n  \tObject httpResponse;\n  \tObject exec;\n  \tMap arguments;\n  \n  \tMap pluginContext;\n  \tObject moduleContext; \n  \n    Map config;\n    Map session;\n      \n    Object aiProviderInterface;\n  \tObject aiImplPlugin;\n  \n    Map toolDefinition = new HashMap();\n  \n    public BackEndToolImplPlugin(){\n\n    }\n  \n    public BackEndToolImplPluginInline(Object httpRequest,Object httpResponse,Map arguments,Object exec){\n          this.arguments\t\t\t\t= arguments;\n          this.httpRequest \t\t\t\t= arguments.get(\"httpRequest\");\n          this.httpResponse \t\t\t= arguments.get(\"httpResponse\");\n          this.exec\t\t\t\t\t\t= exec;\n\t\t  this.pluginContext \t\t\t= arguments.get(\"pluginContext\");\n      \t  this.moduleContext \t\t\t= arguments.get(\"moduleContext\"); \n            \n          exec.logger().info(\"BackEndToolImplPluginInline\");\n    }  \n  \n    public BackEndToolImplPluginInline setAIContext(Object aiProviderInterface, Object aiImplPlugin){\n\t\tthis.aiProviderInterface = aiProviderInterface;\n  \t\tthis.aiImplPlugin = aiImplPlugin;\n      \treturn this;\n    }\n  \n    public Map initEvalContext(Map prompt,Map config,Map session,Object appBuilder,Object aiInterface,Object aiImplPlugin,Object tools){\n\n       return new HashMap();\n    }\n  \n    public Map draw_shape(Map toolCallArgs,Map tool_call,Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n      \n\t\tMap respMsg = [\n            role:\"tool\",\n            tool_call_id:tool_call.id,\n            name:tool_call.function.name,\n            content:\"Shape drawn via crud.\"\n        ];\n      \n        return respMsg;\n    }\n  \n  \n    public Object init(Map toolImplPluginConfig,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n       //toolDefinition = exec.call(\"<path to tool definitions>/toolDefs{}\");\n       return this;\n    }\n  \n    public Map preparePrompt(Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n\n          if(prompt.apiRequest == null)\n          \tprompt.put(\"apiRequest\",new HashMap());\n\n          if(prompt.apiRequest.tools == null)\n          \tprompt.apiRequest.put(\"tools\",new ArrayList());\n\n          //append tools provided by this plugin\n          if(prompt.toolDefinition != null && prompt.toolDefinition.defs != null)\n          \t prompt.apiRequest.tools.addAll(aiImplPlugin.cloneObject(prompt.toolDefinition.defs));\n\n          List dedupTools = new ArrayList();\n          for(Map tool : prompt.apiRequest.tools){\n              if(!aiImplPlugin.isInList(dedupTools,t->t.function.name.equals(tool.function.name)))\n                  dedupTools.add(tool);\n          }\n          prompt.apiRequest.put(\"tools\",dedupTools);\n\n          if(prompt.apiRequest.tool_choice == null)\n          \tprompt.apiRequest.put(\"tool_choice\",\"auto\");\n\n          return prompt;          \n    }\n  \n    public List getTools(Map prompt,Map config,Map session,Object appBuilder,Object aiProviderInterface,Object aiImplPlugin){\n      \treturn getTools(prompt,config,session,aiProviderInterface,aiImplPlugin);\n    }\n  \n    public List getTools(Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n        return (prompt.toolDefinition != null  && prompt.toolDefinition.defs != null)?aiImplPlugin.cloneObject(prompt.toolDefinition.defs):new ArrayList();\n    }\n  \n    public boolean isKnownAITool(Map tool_call,Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n        if(prompt.toolDefinition != null  && prompt.toolDefinition.defs != null){\n            for(Map tool: prompt.toolDefinition.defs){\n               if(tool.function.name.equals(tool_call.function.name)) \n                  return true;\n            }\n        }\n        return false;\n    }\n  \n    public Object executeToolCall(Map tool_call,Map prompt,Map config,Map session,Object aiProviderInterface,Object aiImplPlugin){\n        Map toolCallArgs = new HashMap();\n        if(tool_call.function.arguments != null)\n         \ttoolCallArgs = String.class.isInstance(tool_call.function.arguments)?exec.add(\"solvent_javalang_class\",\"map\").eval(tool_call.function.arguments,\"json\"):tool_call.function.arguments;\n      \n        String executionEnvironment = prompt.executionEnvironment;\n        if(toolCallArgs.executionEnvironment != null && !toolCallArgs.executionEnvironment.equals(\"any\"))\n           executionEnvironment = toolCallArgs.executionEnvironment;\n          \n        if(executionEnvironment != null && executionEnvironment.equals(\"front-end\"))\n          \treturn [sendToClient:true];      \n      \n      \ttry\n        {\n        \treturn this.getClass().getMethod(tool_call.function.name,Map.class,Map.class,Map.class,Map.class,Map.class,Object.class,Object.class).invoke(this,toolCallArgs,tool_call,prompt,config,session,aiProviderInterface,aiImplPlugin);\n        } \n        catch(InvocationTargetException e) {\n            throw e.getCause();\n        }\n    }\n}\n\nreturn new BackEndToolImplPluginInline(arguments.get(\"httpRequest\"),arguments.get(\"httpResponse\"),arguments,exec);\n",
+    "frontEndCode" : "\nlet toolImpl = {\n   \t\t\"toolDefinition\":{},\n        initEvalContext:async function(prompt,config,session,appBuilder,aiInterface,aiImplPlugin,tools=null){\n          \n           return {};\n        },\n        draw_shape:async function(toolCallArgs,tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n            const respMsg = {\n              \"role\":\"tool\",\n              \"tool_call_id\":tool_call.id,\n              \"name\":tool_call.function.name,\n              \"content\":\"Shape drawn.\"\n            };\n          \n            return respMsg;\n        },\n        init:async function(toolImplPluginConfig,config,session,appBuilder,aiInterface,radkitIDEPlugin){\n             const _this = this;\n             \n             return new Promise((resolve,reject)=>{\n                   /*\n                   appBuilder.sendRequest({\n                     type:'POST',\n                     dataType:\"json\",\n                     data:{},\n                     url:(\"/integration/ai/tools/toolDefs{}\")\n                   },toolImplPluginConfig.fqName).\n                   then(function(resp){\n                       _this.toolDefinition = resp;\n                       resolve(_this);\n                   });\n                   */\n                   resolve(_this);\n             });             \n        },\n      \tpreparePrompt:async function(prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n             \n            if(!prompt.apiRequest)\n              prompt[\"apiRequest\"]  = {};\n\n            if(!prompt.apiRequest.tools)\n              prompt[\"apiRequest\"][\"tools\"] = [];\n\n            //append tools provided by this plugin\n            if(prompt.toolDefinition && prompt.toolDefinition.defs){\n                const toolDefinitions = aiImplPlugin.parse(aiImplPlugin.stringify(prompt.toolDefinition.defs));\n                prompt.apiRequest.tools.push(...toolDefinitions);\n            }\n          \n            const dedupTools = [];\n            for(const tool of prompt.apiRequest.tools){\n              if(!dedupTools.find(t=>t.function.name == tool.function.name))\n                dedupTools.push(tool);  \n            }\n            prompt.apiRequest[\"tools\"] = dedupTools;\n          \n            if(!prompt.apiRequest.tool_choice)\n              prompt.apiRequest[\"tool_choice\"] = \"auto\";\n               \n            return prompt;\n        },\n        getTools:function(prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n        \tconst toolDefinitions = (prompt.toolDefinition && prompt.toolDefinition.defs)?aiImplPlugin.parse(aiImplPlugin.stringify(prompt.toolDefinition.defs)):[];\n            return toolDefinitions;\n        },\n\t\tisKnownAITool:function(tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n           return (typeof this[tool_call.function.name] == \"function\");\n        },\n        executeToolCool:async function(tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin){\n           let toolCallArgs = {};\n           if(tool_call.function.arguments)\n                toolCallArgs = typeof tool_call.function.arguments == \"string\"?aiImplPlugin.parse(tool_call.function.arguments):tool_call.function.arguments;\n          \n           let executionEnvironment = prompt.executionEnvironment;\n           if(toolCallArgs.executionEnvironment && toolCallArgs.executionEnvironment != \"any\")\n             \texecutionEnvironment = toolCallArgs.executionEnvironment;\n          \n           if(executionEnvironment && executionEnvironment == \"back-end\")\n          \t\treturn {\"processOnServer\":true};          \n          \n           return await this[tool_call.function.name](toolCallArgs,tool_call,prompt,config,session,appBuilder,aiInterface,aiImplPlugin);\n        }\n};\nPromise.resolve(toolImpl);\n",
+    "backEndCodePathxx" : "/solvent-tests/my-ai-tools/LightWeightToolImpl.ste",
+    "frontEndCodePathxx" : "/solvent-tests/my-ai-tools/LightWeightToolImpl.js",
+    "name" : "default"
+  } ],
+  "toolDefinitionx" : {
+    "defs" : [ {
+      "type" : "function",
+      "function" : {
+        "name" : "generate_qrcode",
+        "description" : "This tool can be used to generate a qr code for small bits of textual information.",
+        "parameters" : {
+          "type" : "object",
+          "properties" : {
+            "qrCodeData" : {
+              "type" : "string",
+              "description" : "This represents the information for which the qr code will be generated"
+            }
+          },
+          "required" : [ "qrCodeData" ]
+        }
+      }
+    } ]
+  },
+  "assistantDefinition" : {
+    "defs" : [ {
+      "assistantId" : "1748002357621",
+      "name" : "term",
+      "label" : "Linux Programmer",
+      "description" : "This assistant is Linux programmer with full access to the Linux operating system and internet access.\nWhen given instructions, he will use the Linux operating system and the internet to complete tasks. The\nassistant's name is \"Term\".",
+      "parameters" : {
+        "type" : "object",
+        "properties" : {
+          "promptText" : {
+            "type" : "string",
+            "description" : "This is the instruction text that should be provided to the assistant for the task it must complete"
+          },
+          "supervisorName" : {
+            "type" : "string",
+            "description" : "This is the name of the entity directly invoking this assistant, in other words even if the entity was themself\ninvoked by a supervisor, in this case their supervisor is not this assistant's supervisor, they themself\nare the supervisor."
+          }
+        },
+        "required" : [ "promptText" ]
+      }
+    }, {
+      "assistantId" : "1752680473474",
+      "name" : "biomni",
+      "label" : "A General-Purpose Biomedical Scientist",
+      "description" : "This assistant is A General-Purpose Biomedical Scientist.\nWhen given instructions, she will use her biomedical knowledge to complete tasks. The\nassistant's name is \"Biomni\".",
+      "parameters" : {
+        "type" : "object",
+        "properties" : {
+          "promptText" : {
+            "type" : "string",
+            "description" : "This is the instruction text that should be provided to the assistant for the task it must complete"
+          },
+          "supervisorName" : {
+            "type" : "string",
+            "description" : "This is the name of the entity directly invoking this assistant, in other words even if the entity was themself\ninvoked by a supervisor, in this case their supervisor is not this assistant's supervisor, they themself\nare the supervisor."
+          }
+        },
+        "required" : [ "promptText" ]
+      }
+    }, {
+      "assistantId" : "1753466558529",
+      "name" : "integrator",
+      "label" : "Integrated Services Assistant",
+      "description" : "This assistant can process documents and extract information from them. It can be used to extract text from \npdf documents and save file to external cloud service storage",
+      "parameters" : {
+        "type" : "object",
+        "properties" : {
+          "promptText" : {
+            "type" : "string",
+            "description" : "This is the instruction text that should be provided to the assistant for the task it must complete"
+          }
+        },
+        "required" : [ "promptText" ]
+      }
+    } ]
+  },
+  "useSessionProfile" : "default",
+  "requireUserInstructions" : true,
+  "writeContextToClipboard" : ".txt,.ai,.json,.css,.svg,.html,.htm",
+  "fileSystemContextIncludes" : {
+    "default" : {
+      "files" : [ {
+        "path" : "/solvent-tests/ai-fs-test/saved-poem.txt",
+        "isDir" : false
+      } ],
+      "name" : "Include additional files"
+    }
+  },
+  "toolSetOverride" : [ "save_to_file", "read_from_file", "list_dir", "move_file", "copy_file", "rename_file", "delete_file", "create_file", "download_file", "display_question_form_to_user", "generate_qrcode", "send_email", "text_content_reviewer" ],
+  "assistantSetOverride" : [ "term", "biomni" ],
+  "useAssistants" : [ {
+    "assistantId" : "1748002357621",
+    "invokeContextData" : {
+      "skipTTS" : true,
+      "disableTools" : [ "text_content_reviewer", "display_question_form_to_user" ]
+    },
+    "copyActiveContextData" : [ "workingDir" ]
+  }, {
+    "assistantId" : "1752680473474",
+    "runAsTask" : true,
+    "sendResponseToClient" : true,
+    "invokeContextData" : {
+      "skipTTS" : true,
+      "disableTools" : [ "text_content_reviewer", "display_question_form_to_user" ]
+    },
+    "copyActiveContextData" : [ "workingDir" ]
+  }, {
+    "assistantId" : "1753466558529",
+    "invokeContextData" : {
+      "skipTTS" : true,
+      "disableTools" : [ "text_content_reviewer", "display_question_form_to_user" ]
+    },
+    "copyActiveContextData" : [ "workingDir" ]
+  } ],
+  "humanInLoopTools" : {
+    "text_content_reviewer" : {
+      "appURL" : "/HumanInLoop/appserver/text-reviewer/App{}.index.html",
+      "appDirPathx" : "/work/HumanInLoop",
+      "name" : "text_content_reviewer",
+      "appLabel" : "Text Content Reviewer",
+      "enternalWindow" : false,
+      "skipMetadataDisplay" : true
+    }
+  },
+  "invokeContext" : {
+    "contextData" : {
+      "promptText" : null,
+      "fileSystemContextIncludes" : {
+        "default" : {
+          "files" : [ ],
+          "name" : "Include additional files"
+        }
+      }
+    }
+  },
+  "taskSchedule" : {
+    "seqGroupId" : null,
+    "sequenceNumber" : null,
+    "useSessionProfile" : "gemini",
+    "autoStart" : false,
+    "runAsUser" : "0",
+    "period" : {
+      "sleepInterval" : 60,
+      "runLimit" : 2
+    }
+  },
+  "skipProgram" : false,
+  "dialogText" : "---begin-prompt---\nBelow is information that will help you in performing the requested task, it might be instructions or just be additional information, use it as appropriate:\n${botworx-await aiImplPlugin.getInstructions(prompt,(aiImplPlugin.isDefined(prompt.invokeContext.contextData.promptText) && aiImplPlugin.objectSize(prompt.invokeContext.contextData.promptText) > 0),false,true,(aiImplPlugin.isDefined(session)?session.id:null))}\n---end-prompt---\n---begin-prompt-data---\n{\n  \"evalContextData\":${terminal aiImplPlugin.stringify(botworx-await aiImplPlugin.getFromMap(tools,\"default\").initEvalContext(prompt,config,session,appBuilder,aiInterface,aiImplPlugin,tools))}\n}\n---end-prompt-data---",
+  "contextLimit" : -1,
+  "executionEnvironment" : "front-end",
+  "mediaSettings" : {
+    "enableQRCodeScanner" : true,
+    "ttsEnabled" : true,
+    "useTTSProfiles" : [ "edgar" ]
+  },
+  "solvent_object_metadata" : "{\"schema_ux\":{\"object_def\":{}}}",
+  "supervisorProfiles" : {
+    "edmond" : {
+      "First Name" : "Edmond",
+      "Last Name" : "Kemokai",
+      "E-Mail" : "ekemokai@codesolvent.com",
+      "Website" : "https://codesolvent.com",
+      "Phone#" : "973-570-6363",
+      "Work Title" : "Founder, Codesolvent Inc."
+    }
+  },
+  "enableDynamicToolUseResolution" : false,
+  "enableDynamicAssistantUseResolution" : false
+}
