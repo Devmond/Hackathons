@@ -12,3 +12,5 @@ AWS Integration assistant - A technical assistant that uses tools to interact wi
 The Solvent plugin configuration of the above two agents is extracted into the following json files 
    agents/tool-impl/edgar-personal-assistant.json
    agents/tool-impl/aws-integration-service-assistant.json
+    
+test
